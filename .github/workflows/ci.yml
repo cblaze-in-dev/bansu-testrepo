@@ -1,0 +1,44 @@
+# Spike 002 test workflow: a fast job and a slow job that writes a line every 5 seconds,
+# so the live-log behaviour of the GitHub API can be observed while it runs.
+name: CI
+on:
+  push:
+  workflow_dispatch:
+    inputs:
+      duration:
+        description: Seconds the slow job keeps writing
+        type: number
+        default: 300
+      fail:
+        description: Make the slow job fail at the end
+        type: boolean
+        default: false
+      flavour:
+        description: A choice input for the inputs form
+        type: choice
+        options: [plain, tea, sake]
+        default: plain
+
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "lint ok"
+
+  slow-test:
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Write a line every 5 seconds
+        run: |
+          end=$(( $(date +%s) + ${{ inputs.duration || 300 }} ))
+          i=0
+          while [ "$(date +%s)" -lt "$end" ]; do
+            i=$((i+1)); echo "line $i at $(date -u +%H:%M:%S)"; sleep 5
+          done
+      - name: Optional failure
+        if: ${{ inputs.fail }}
+        run: |
+          echo "ERROR: deliberate failure for the spike"
+          exit 1

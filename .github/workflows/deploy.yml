@@ -1,0 +1,15 @@
+# Spike 002 test workflow: a deploy job behind a protected environment, so the run
+# waits for a reviewer (GitHub's equivalent of a GitLab manual job).
+# Deploy
+name: Deploy
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - run: echo "deployed"

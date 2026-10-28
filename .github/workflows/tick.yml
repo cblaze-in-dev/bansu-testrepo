@@ -1,0 +1,17 @@
+# Bansū's pilot week (Plan 001 S-49, MC-09): a run every 3 hours, so the GitHub
+# connection watches real runs. Every fourth one fails, for a change of state.
+name: Tick
+on:
+  schedule:
+    - cron: "17 */3 * * *"
+  workflow_dispatch:
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "tick at $(date -u +%H:%M)"
+          if [ $(( 10#$(date -u +%H) / 3 % 4 )) -eq 0 ]; then
+            echo "ERROR: the fourth tick fails"; exit 1
+          fi
